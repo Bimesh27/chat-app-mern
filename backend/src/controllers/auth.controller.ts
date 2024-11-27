@@ -9,6 +9,11 @@ interface SignUpBody {
   password: string;
 }
 
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { fullName, email, password }: SignUpBody = req.body;
   try {
@@ -16,12 +21,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({
         message: "All fields are required",
       });
+      return;
     }
 
     if (password.length < 6) {
       res.status(400).json({
         message: "Password must be at least 6 characters long",
       });
+      return;
     }
 
     const user = await User.findOne({ email });
@@ -29,6 +36,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({
         message: "Email already exists",
       });
+      return;
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -50,10 +58,12 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         email: newUser.email,
         profilePic: newUser.profilePic,
       });
+      return;
     } else {
       res.status(400).json({
         message: "Invalid user data",
       });
+      return;
     }
   } catch (error: unknown) {
     console.log(
@@ -63,13 +73,84 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({
       message: "Internal server error",
     });
+    return;
   }
 };
 
-export const login = (req: Request, res: Response) => {
-  res.send("login route");
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const { email, password }: LoginBody = req.body;
+  try {
+    if (!email || !password) {
+      res.status(400).json({
+        message: "All fields are required",
+      });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(400).json({
+        message: "Invalid credentials",
+      });
+      return;
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      res.status(400).json({
+        message: "Invalid credentials",
+      });
+      return;
+    }
+
+    generateToken(user._id as string, res);
+
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+    });
+
+    return;
+  } catch (error) {
+    console.log(
+      "Error in login controller:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Internal server error",
+    });
+    return;
+  }
 };
 
-export const logout = (req: Request, res: Response) => {
-  res.send("logout route");
+export const logout = (req: Request, res: Response): void => {
+  //no async fn thats y void only
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+
+    res.status(200).json({
+      message: "Logged out successfully",
+    });
+
+    return;
+  } catch (error) {
+    console.log(
+      "Error in logout controller:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Internal server error",
+    });
+    return;
+  }
 };
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
