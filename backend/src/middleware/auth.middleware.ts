@@ -8,7 +8,7 @@ interface DecodedToken {
   userId: string;
 }
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
   user?: UserInstance;
 }
 
@@ -21,7 +21,7 @@ export const protectRoute = async (
     const token = req.cookies.jwt;
     if (!token) {
       res.status(401).json({
-        message: "You need to be logged in to visit this route",
+        message: "Unauthorized - No token provided",
       });
       return;
     }
