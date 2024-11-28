@@ -178,6 +178,7 @@ export const updateProfile = async (
     );
 
     res.status(200).json(updatedUser);
+    return;
   } catch (error: unknown) {
     console.log(
       "Error in updateProfile controller:",
@@ -186,17 +187,20 @@ export const updateProfile = async (
     res.status(500).json({
       message: "Internal server error",
     });
+    return;
   }
 };
 
 export const checkAuth = async (req: CustomRequest, res: Response) => {
   try {
     res.status(200).json(req.user);
+    return;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : error;
     console.log("Error in checkAuth controller:", errorMessage);
     res.status(500).json({
       message: "Internal server error",
     });
+    return;
   }
 };
