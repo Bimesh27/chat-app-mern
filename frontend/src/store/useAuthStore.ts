@@ -6,6 +6,8 @@ interface AuthUser {
   email: string;
   fullName: string;
   profilePic: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface SignUpData {
@@ -19,6 +21,10 @@ interface LoginData {
   password: string;
 }
 
+interface UpdateProfileData {
+  profilePic: string;
+}
+
 interface AuthStore {
   authUser: AuthUser | null;
   isSigningUp: boolean;
@@ -29,6 +35,7 @@ interface AuthStore {
   signup: (data: SignUpData) => Promise<void>;
   logout: () => Promise<void>;
   login: (data: LoginData) => Promise<void>;
+  updateProfile: (data: UpdateProfileData) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -89,6 +96,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
       toast.error(errorMessage.response.data.message);
     } finally {
       set({ isLoggingIn: false });
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("/auth/update-profile", data);
+      set({ authUser: res.data });
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.log("Error in updateProfile", error);
+      const errorMessage = error as { response: { data: { message: string } } };
+      toast.error(errorMessage.response.data.message);
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
