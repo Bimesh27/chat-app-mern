@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 interface AuthUser {
+  _id: string
   email: string;
   fullName: string;
   profilePic: string;
@@ -31,6 +32,7 @@ interface AuthStore {
   isLoggingIn: boolean;
   isUpdatingProfile: boolean;
   isCheckingAuth: boolean;
+  onlineUsers: string[];
   checkAuth: () => Promise<void>;
   signup: (data: SignUpData) => Promise<void>;
   logout: () => Promise<void>;
@@ -43,6 +45,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
+  onlineUsers: [],
 
   isCheckingAuth: true,
 
