@@ -3,6 +3,7 @@ import { CustomRequest } from "../middleware/auth.middleware";
 import User from "../models/user.model";
 import Message from "../models/message.model";
 import cloudinary from "../lib/cloudinary";
+import { getRecieverSocketId, io } from "../lib/socket";
 
 export const getUsersForSidebar = async (
   req: CustomRequest,
@@ -84,8 +85,10 @@ export const sendMessage = async (req: CustomRequest, res: Response) => {
     });
 
     await newMessage.save();
-
-    //realtime functionality goes here
+    const recieverSocketId = getRecieverSocketId(receiverId);
+    if(recieverSocketId) {
+      io.to(recieverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
     return;
